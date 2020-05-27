@@ -1,0 +1,131 @@
+POST http://localhost:8848/api/updatehandbook
+Content-Type: application/json
+
+{
+  "openid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
+  "monster1": 0,
+  "monster2": 1,
+  "monster3": 2,
+  "monster4": 3,
+  "monster5": 4,
+  "monster6": 5,
+  "monster7": 6
+}
+
+###
+###
+POST http://localhost:8848/api/insertuserpiece
+Content-Type: application/json
+
+{
+  "openid": "oVQwG5gSjuwDY5s8mCr03D5kTFkI",
+  "xuanyuanjian": 1,
+  "donghuangzhong": 2,
+  "pangufu": 3,
+  "lianyaohu": 4,
+  "haotianta": 5,
+  "fuxiqin": 6,
+  "shennongding": 7,
+  "kongtongyin": 8,
+  "kunlunjing": 9,
+  "nvwashi": 0
+}
+
+###
+POST http://localhost:8848/api/addintorecruit HTTP/1.1
+Content-Type: application/json
+
+{
+  "openid": "abcde",
+  "makerid": "bcdef",
+  "sessionKey": "session"
+}
+###
+
+POST http://localhost:8848/api/openid
+Content-Type: application/json
+
+{
+  "code": "033wXcIa0rxOHB1bgmGa0xA5Ia0wXcIz"
+}
+
+###
+POST http://localhost:8848/api/handbookbyopenid
+Content-Type: application/json
+
+{
+  "openid": "oVQwG5gSjuwDY5s8mCr03D5kTFkI"
+}
+
+###
+POST http://localhost:8848/api/deleterecruit
+Content-Type: application/json
+
+{
+  "makerid": "999",
+  "bossid": 9,
+  "bosslife": 9,
+  "gamer1": "987",
+  "gamer2": "654",
+  "gamer3": "321"
+}
+
+###
+POST http://localhost:8848/api/insertrecruit
+Content-Type: application/json
+
+{
+  "makerid": "999",
+  "bossid": 9,
+  "bosslife": 9,
+  "gamer1": "987",
+  "gamer2": "654",
+  "gamer3": "321"
+}
+
+###
+POST http://localhost:8848/api/recruitbymakerid
+Content-Type: application/json
+
+{
+  "makerid": "123",
+  "bossid": 0,
+  "bosslife": 0,
+  "gamer1": "",
+  "gamer2": "",
+  "gamer3": ""
+}
+
+###
+POST http://localhost:8848/api/updateuserpiece
+Content-Type: application/json
+
+{
+  "openid": "oVQwG5gSjuwDY5s8mCr03D5kTFkI",
+  "xuanyuanjian": 1,
+  "donghuangzhong": 2,
+  "pangufu": 3,
+  "lianyaohu": 4,
+  "haotianta": 5,
+  "fuxiqin": 6,
+  "shennongding": 7,
+  "kongtongyin": 8,
+  "kunlunjing": 9,
+  "nvwashi": 10
+}
+
+###
+POST http://localhost:8848/api/piecebyopenid
+Content-Type: application/json
+
+{
+  "openid": "oVQwG5gSjuwDY5s8mCr03D5kTFkI"
+}
+
+###
+GET http://localhost:8848/api/alluserdata
+Content-Type: application/json
+
+{}
+
+###

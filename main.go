@@ -40,13 +40,13 @@ func main() {
 	if err != nil {
 		log.Panic(err.Error())
 	}
+	// 关闭数据库
+	defer dao.CloseMySQL()
 
 	// 开启Redis连接池
 	dao.InitRedisPool()
 	// 关闭Redis连接池
 	defer dao.Pool.Close()
-	// 关闭数据库
-	defer dao.CloseMySQL()
 
 	// 注册路由
 	routers.UserRouter(r)

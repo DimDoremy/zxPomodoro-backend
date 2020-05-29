@@ -17,4 +17,5 @@ require (
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.5
 	golang.org/x/tools v0.0.0-20200513201620-d5fe73897c97 // indirect
+	github.com/robfig/cron/v3 v3.0.1
 )

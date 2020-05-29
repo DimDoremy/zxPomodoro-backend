@@ -9,23 +9,18 @@ import (
 	"time"
 )
 
-//存储session结构体
-type Session struct {
-	Openid     string   `json:"openid"`
-	Recruit    []string `json:"recruit"`
-}
-
+// Room结构体
 type Room struct {
-	*Session
-	StartTime time.Time	`json:"start_time"`
-	EndTime time.Time `json:"end_time"`
+	Openid    string    `json:"openid"`
+	Recruit   []string  `json:"recruit"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
 }
 
-//设置session进入redis
-func SetSessionIntoRedis(openid []byte, json []byte, db int) {
+// 写入redis
+func SetRoomIntoRedis(openid []byte, json []byte, db int) {
 	conn := dao.Pool.Get()
 	defer conn.Close()
-	//fmt.Println(openid, " ", json)
 	reply, err := conn.Do("Select", db)
 	if err != nil {
 		log.Println("Change DB failed:", err.Error())
@@ -50,22 +45,39 @@ func SetSessionIntoRedis(openid []byte, json []byte, db int) {
 }
 
 //获得redis存储的session
-func GetSessionByRedis(openid []byte, db int) Session {
+func GetRoomByRedis(openid []byte, db int) Room {
 	conn := dao.Pool.Get()
 	defer conn.Close()
-	var session Session
-	session = Session{}
-	reply, _ := conn.Do("Select", db)
-	log.Println(reply.(string))
+	var room Room
+	room = Room{}
+	_, _ = conn.Do("Select", db)
+	//reply, _ := conn.Do("Select", db)
+	//log.Println(reply.(string))
 	jsons, err := redis.String(conn.Do("GET", openid))
 	if err != nil {
 		log.Println("Get failed:", err.Error())
-		return session
+		return room
 	}
-	err = json.Unmarshal([]byte(jsons), &session)
+	err = json.Unmarshal([]byte(jsons), &room)
 	if err != nil {
 		log.Println("Get failed:", err.Error())
-		return session
+		return room
 	}
-	return session
+	return room
+}
+
+//删除redis的指定键值对
+func DelRoomByRedis(openid []byte, db int) error {
+	conn := dao.Pool.Get()
+	defer conn.Close()
+	_, _ = conn.Do("Select", db)
+	_, err := redis.String(conn.Do("GET", openid))
+	if err != nil {
+		return err
+	}
+	_, err = conn.Do("Del", openid)
+	if err != nil {
+		return err
+	}
+	return nil
 }

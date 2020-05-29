@@ -1,3 +1,43 @@
+POST http://localhost:8848/api/add_into_recruit
+Content-Type: application/json
+
+{
+  "openid": "abc",
+  "makerid": "bcd",
+  "time": 3600
+}
+
+###
+POST http://localhost:8848/api/add_into_public
+Content-Type: application/json
+
+{
+  "openid": "abc",
+  "makerid": "ms1",
+  "time": 3600
+}
+
+###
+POST http://localhost:8848/api/delete_room
+Content-Type: application/json
+
+{
+  "openid": "abc",
+  "makerid": "abc",
+  "time": 3600
+}
+
+###
+POST http://localhost:8848/api/new_room
+Content-Type: application/json
+
+{
+  "openid": "abc",
+  "makerid": "abc",
+  "time": 3600
+}
+
+###
 POST http://localhost:8848/api/updatehandbook
 Content-Type: application/json
 

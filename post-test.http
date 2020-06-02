@@ -1,9 +1,29 @@
+POST http://localhost:8848/api/return_recruit
+Content-Type: application/json
+
+{
+  "openid": "abc",
+  "makerid": "bcde",
+  "time": 3600
+}
+
+###
+POST http://localhost:8848/api/remove_recruit
+Content-Type: application/json
+
+{
+  "openid": "abc",
+  "makerid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
+  "time": 3600
+}
+
+###
 POST http://localhost:8848/api/add_into_recruit
 Content-Type: application/json
 
 {
   "openid": "abc",
-  "makerid": "bcd",
+  "makerid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
   "time": 3600
 }
 

@@ -26,7 +26,7 @@ func main() {
 	//gin.ForceConsoleColor()
 	// 关闭控制台日志颜色，Windows控制台颜色显示有问题建议直接关闭
 	gin.DisableConsoleColor()
-	// 设置release模式运行
+	//设置release模式运行
 	//gin.SetMode(gin.ReleaseMode)
 
 	// 新建gin框架
@@ -54,6 +54,7 @@ func main() {
 	routers.BookRouter(r)
 	routers.RecruitRouters(r)
 	routers.WechatRouter(r)
+	routers.BackendRouters(r)
 
 	// 启动框架并判断运行是否成功
 	err = r.Run(":8848")

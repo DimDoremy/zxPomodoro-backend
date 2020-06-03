@@ -14,6 +14,7 @@ import (
 type Personal struct {
 	Openid  string   `json:"openid"`
 	Recruit []string `json:"recruit"`
+	Score   []int64  `json:"score"`
 }
 
 // Room结构体
@@ -22,12 +23,6 @@ type Room struct {
 	Recruit   []string  `json:"recruit"`
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
-}
-
-// Score结构体
-type Score struct {
-	Openid string                 `json:"openid"`
-	Score  map[string]interface{} `json:"score"`
 }
 
 // 切片转换为Map

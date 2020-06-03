@@ -1,3 +1,23 @@
+POST http://localhost:8848/api/complete_recruit
+Content-Type: application/json
+
+{
+  "openid": "abc",
+  "makerid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
+  "time": 5000
+}
+
+###
+POST http://localhost:8848/api/accept_recruit
+Content-Type: application/json
+
+{
+  "openid": "abc",
+  "makerid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
+  "time": 5000
+}
+
+###
 POST http://localhost:8848/api/return_recruit
 Content-Type: application/json
 

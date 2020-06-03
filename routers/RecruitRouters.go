@@ -8,19 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
 	"net/http"
+	"reflect"
 	"time"
 )
 
 const (
 	PersonalRecruitDb = iota
 	RoomRecruitDb
-	ScoreRecruitDb
 )
 
 // 客户端请求使用的结构体
 type requests struct {
 	Openid  string `json:"openid"`
 	Makerid string `json:"makerid"`
+	Time    int64  `json:"time"`
 }
 
 // 展示所有的redis缓存
@@ -177,6 +178,7 @@ func addIntoRecruit(group *gin.RouterGroup) {
 					byRedis = util.Personal{
 						Openid:  "",
 						Recruit: []string{},
+						Score:   []int64{},
 					}
 				} else {
 					context.JSON(http.StatusBadRequest, messageBind)
@@ -186,6 +188,7 @@ func addIntoRecruit(group *gin.RouterGroup) {
 			tempPersonal := util.Personal{
 				Openid:  byRedis.(util.Personal).Openid,
 				Recruit: byRedis.(util.Personal).Recruit,
+				Score:   byRedis.(util.Personal).Score,
 			}
 			// 如果没有加入任何招募，新建招募缓存
 			if tempPersonal.Openid == "" {
@@ -208,11 +211,9 @@ func addIntoRecruit(group *gin.RouterGroup) {
 						scanTempKeys, _ := redis.Strings(scan[1], nil)
 						scanKeys = append(scanKeys, scanTempKeys...)
 					}
-					//fmt.Println(iter)
 				}
 				return scanKeys
 			}
-			//fmt.Println(funcKeys())
 			for index, value := range funcKeys() {
 				// 如果扫描存在这个makerid，跳出扫描
 				if rr.Makerid == value {
@@ -234,7 +235,7 @@ func addIntoRecruit(group *gin.RouterGroup) {
 			// 如果没有重复进入
 			if !isExist {
 				tempPersonal.Recruit = append(tempPersonal.Recruit, rr.Makerid)
-				//log.Println(tempPersonal)
+				tempPersonal.Score = append(tempPersonal.Score, 0)
 				newRedis, _ := json.Marshal(tempPersonal)
 				util.SetIntoRedis([]byte(rr.Openid), newRedis, PersonalRecruitDb)
 				var sessionModel util.Personal
@@ -275,6 +276,7 @@ func removeFromRecruit(group *gin.RouterGroup) {
 					byRedis = util.Personal{
 						Openid:  "",
 						Recruit: []string{},
+						Score:   []int64{},
 					}
 				} else {
 					context.JSON(http.StatusBadRequest, messageBind)
@@ -284,6 +286,7 @@ func removeFromRecruit(group *gin.RouterGroup) {
 			tempPersonal := util.Personal{
 				Openid:  byRedis.(util.Personal).Openid,
 				Recruit: byRedis.(util.Personal).Recruit,
+				Score:   byRedis.(util.Personal).Score,
 			}
 			// 判断招募列表中是否存在makerid与退出的id相同的数据，并获取索引位置
 			for index, value := range tempPersonal.Recruit {
@@ -295,6 +298,7 @@ func removeFromRecruit(group *gin.RouterGroup) {
 			// 如果索引位置存在，即数组序号大于等于0
 			if number >= 0 {
 				tempPersonal.Recruit = append(tempPersonal.Recruit[:number], tempPersonal.Recruit[number+1:]...)
+				tempPersonal.Score = append(tempPersonal.Score[:number], tempPersonal.Score[number+1:]...)
 				// 如果删除后为空，则将其销毁
 				if len(tempPersonal.Recruit) <= 0 {
 					err := util.DeleteFromRedis([]byte(rr.Openid), PersonalRecruitDb)
@@ -337,13 +341,15 @@ func newRecruitRoom(group *gin.RouterGroup) {
 				// 添加用户至房间
 				getByRedis := util.GetByRedis([]byte(rp.Makerid), PersonalRecruitDb)
 				recruitByRedis := getByRedis.(util.Personal).Recruit
+				scoreByRedis := getByRedis.(util.Personal).Score
 				recruitByRedis = append(recruitByRedis, rp.Openid)
+				scoreByRedis = append(scoreByRedis, 0)
 				personal := util.Personal{
 					Openid:  rp.Makerid,
 					Recruit: recruitByRedis,
+					Score:   scoreByRedis,
 				}
 				marshal, _ = json.Marshal(personal)
-				//fmt.Println(marshal)
 				util.SetIntoRedis([]byte(rp.Makerid), marshal, PersonalRecruitDb)
 				context.JSON(http.StatusOK, makerModel)
 			} else {
@@ -376,6 +382,7 @@ func deleteRecruitRoom(group *gin.RouterGroup) {
 							byRedis = util.Personal{
 								Openid:  "",
 								Recruit: []string{},
+								Score:   []int64{},
 							}
 						} else {
 							context.JSON(http.StatusBadRequest, messageBind)
@@ -385,6 +392,7 @@ func deleteRecruitRoom(group *gin.RouterGroup) {
 					tempPersonal := util.Personal{
 						Openid:  personalByRedis.(util.Personal).Openid,
 						Recruit: personalByRedis.(util.Personal).Recruit,
+						Score:   personalByRedis.(util.Personal).Score,
 					}
 					// 判断招募列表中是否存在makerid与退出的id相同的数据，并获取索引位置
 					for index, value := range tempPersonal.Recruit {
@@ -396,6 +404,7 @@ func deleteRecruitRoom(group *gin.RouterGroup) {
 					// 如果索引位置存在，即数组序号大于等于0
 					if number >= 0 {
 						tempPersonal.Recruit = append(tempPersonal.Recruit[:number], tempPersonal.Recruit[number+1:]...)
+						tempPersonal.Score = append(tempPersonal.Score[:number], tempPersonal.Score[number+1:]...)
 						// 如果删除后为空，则将其销毁
 						if len(tempPersonal.Recruit) <= 0 {
 							err := util.DeleteFromRedis([]byte(rp.Openid), PersonalRecruitDb)
@@ -421,18 +430,87 @@ func deleteRecruitRoom(group *gin.RouterGroup) {
 	})
 }
 
-// TODO：结算请求
 // 接收客户端完成的积分
 func acceptRecruit(group *gin.RouterGroup) {
 	group.POST("/accept_recruit", func(context *gin.Context) {
-		var rp model.RequestPersonal
+		var rr requests
 		util.JsonBind(context, func() {
-			byRedis := util.GetByRedis([]byte(rp.Openid), ScoreRecruitDb)
-			_, types := byRedis.(model.MessageBind)
+			// 获取个人参加招募缓存
+			byRedis := util.GetByRedis([]byte(rr.Openid), PersonalRecruitDb)
+			// 判断是否获取到的是错误信息
+			_, types := byRedis.(util.Personal)
 			if !types {
-
+				messageBind := byRedis.(model.MessageBind)
+				context.JSON(http.StatusBadRequest, messageBind)
+				return
 			}
-		}, &rp)
+			personalValue := reflect.ValueOf(byRedis)
+			recruit := personalValue.Field(1).Interface().([]string)
+			score := personalValue.Field(2).Interface().([]int64)
+			for i, v := range recruit {
+				if v == rr.Makerid {
+					score[i] += rr.Time
+					break
+				}
+			}
+			tempPersonal := util.Personal{
+				Openid:  byRedis.(util.Personal).Openid,
+				Recruit: recruit,
+				Score:   score,
+			}
+			newRedis, _ := json.Marshal(tempPersonal)
+			util.SetIntoRedis([]byte(rr.Openid), newRedis, PersonalRecruitDb)
+			context.JSON(http.StatusOK, tempPersonal)
+		}, &rr)
+	})
+}
+
+// 结算请求
+func completeRecruit(group *gin.RouterGroup) {
+	group.POST("/complete_recruit", func(context *gin.Context) {
+		var rr requests
+		util.JsonBind(context, func() {
+			playerScore := 0
+			byRedis := util.GetByRedis([]byte(rr.Openid), PersonalRecruitDb)
+			// 判断是否获取到的是错误信息
+			_, types := byRedis.(util.Personal)
+			if !types {
+				messageBind := byRedis.(model.MessageBind)
+				context.JSON(http.StatusBadRequest, messageBind)
+				return
+			}
+			personalValue := reflect.ValueOf(byRedis)
+			recruit := personalValue.Field(1).Interface().([]string)
+			score := personalValue.Field(2).Interface().([]int64)
+			for i, v := range recruit {
+				if v == rr.Makerid {
+					playerScore = int(score[i])
+					break
+				}
+			}
+			byRedis = util.GetByRedis([]byte(rr.Makerid), RoomRecruitDb)
+			_, types = byRedis.(util.Room)
+			if !types {
+				messageBind := byRedis.(model.MessageBind)
+				context.JSON(http.StatusBadRequest, messageBind)
+				return
+			}
+			roomValue := reflect.ValueOf(byRedis)
+			roomStart := roomValue.Field(2).Interface().(time.Time)
+			roomEnd := roomValue.Field(3).Interface().(time.Time)
+			returnStruct := struct {
+				Openid      string        `json:"openid"`
+				Makerid     string        `json:"makerid"`
+				PlayerScore time.Duration `json:"player_score"`
+				AllScore    time.Duration `json:"all_score"`
+			}{
+				rr.Openid,
+				rr.Makerid,
+				time.Duration(playerScore),
+				roomEnd.Sub(roomStart),
+			}
+			context.JSON(http.StatusOK, returnStruct)
+		}, &rr)
 	})
 }
 
@@ -446,5 +524,6 @@ func RecruitRouters(router *gin.Engine) {
 		newRecruitRoom(recruitGroup)
 		deleteRecruitRoom(recruitGroup)
 		acceptRecruit(recruitGroup)
+		completeRecruit(recruitGroup)
 	}
 }

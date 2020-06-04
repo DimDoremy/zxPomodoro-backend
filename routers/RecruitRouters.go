@@ -78,89 +78,43 @@ func showRedisRecruit(group *gin.RouterGroup) {
 	})
 }
 
+// TODO: 返回对应用户的缓存
 // 返回所有的redis缓存
 func returnRedisRecruit(group *gin.RouterGroup) {
+	var rr requests
 	group.POST("/return_recruit", func(context *gin.Context) {
-		iter := 0
-		var scanKeys []string
-		var scanValues []string
-		conn := dao.Pool.Get()
-		defer conn.Close()
-		var rp model.RequestPersonal
+		returnStruct := struct {
+			Recruits   util.Personal `json:"recruits"`
+			StartTimes []time.Time   `json:"start_times"`
+			EndTimes   []time.Time   `json:"end_times"`
+		}{
+			util.Personal{},
+			[]time.Time{},
+			[]time.Time{},
+		}
 		util.JsonBind(context, func() {
-			// 扫描Personal
-			_, _ = conn.Do("Select", PersonalRecruitDb)
-			for iter != 48 {
-				scan, err := redis.Values(conn.Do("SCAN", iter))
-				if err != nil {
+			personal := util.GetByRedis([]byte(rr.Openid), PersonalRecruitDb)
+			_, types := personal.(util.Personal)
+			if !types {
+				messageBind := personal.(model.MessageBind)
+				context.JSON(http.StatusBadRequest, messageBind)
+				return
+			}
+			returnStruct.Recruits = personal.(util.Personal)
+			field := reflect.ValueOf(personal).Field(1).Interface().([]string)
+			for _, v := range field {
+				room := util.GetByRedis([]byte(v), RoomRecruitDb)
+				_, types := room.(util.Room)
+				if !types {
+					messageBind := room.(model.MessageBind)
+					context.JSON(http.StatusBadRequest, messageBind)
 					return
-				} else {
-					iters, _ := redis.Bytes(scan[0], nil)
-					iter = int(iters[0])
-					scanTempKeys, _ := redis.Strings(scan[1], nil)
-					for _, value := range scanTempKeys {
-						scanTempValue, _ := redis.String(conn.Do("Get", value))
-						scanValues = append(scanValues, scanTempValue)
-					}
-					scanKeys = append(scanKeys, scanTempKeys...)
 				}
+				returnStruct.StartTimes = append(returnStruct.StartTimes, room.(util.Room).StartTime)
+				returnStruct.EndTimes = append(returnStruct.EndTimes, room.(util.Room).EndTime)
 			}
-			//personalKeys := scanKeys     // 个人openid
-			personalValues := scanValues // 个人参加的全部房间号
-			//fmt.Println(personalKeys)
-			//fmt.Println(personalValues)
-			// 闭包解析key作为personal结构体
-			structFunc := func(valueArrays []string) []util.Personal {
-				var up util.Personal
-				var upSlice []util.Personal
-				for _, v := range valueArrays {
-					err := json.Unmarshal([]byte(v), &up)
-					if err != nil {
-						return []util.Personal{}
-					}
-					upSlice = append(upSlice, up)
-				}
-				return upSlice
-			}(personalValues)
-			var up util.Personal
-			var toMapSlice []map[string]interface{}
-			for _, v := range personalValues {
-				_ = json.Unmarshal([]byte(v), &up)
-				toMap := util.StructToMap(up)
-				toMapSlice = append(toMapSlice, toMap)
-			}
-			// 扫描Room
-			_, _ = conn.Do("Select", RoomRecruitDb)
-			// 循环个人招募信息结构体获取对应的加入房间，并根据房间号查找房间时间
-			var ur util.Room
-			var startTimeSlice []time.Time
-			var endTimeSlice []time.Time
-			//fmt.Println(structFunc)
-			for _, values := range structFunc {
-				// 重置scan
-				scanKeys = []string{}   // 重置scanKeys
-				scanValues = []string{} // 重置scanValues
-				for _, v := range values.Recruit {
-					tempValue, _ := redis.String(conn.Do("Get", v))
-					_ = json.Unmarshal([]byte(tempValue), &ur)
-					startTimeSlice = append(startTimeSlice, ur.StartTime) // 开始时间统计切片
-					endTimeSlice = append(endTimeSlice, ur.EndTime)       // 结束时间统计切片
-					scanValues = append(scanValues, tempValue)            // 每个房间信息
-				}
-				scanKeys = append(scanKeys, values.Openid) // 每个房间号
-			}
-			returnStruct := struct {
-				Recruit   []map[string]interface{} `json:"recruit"`
-				StartTime []time.Time              `json:"start_time"`
-				EndTime   []time.Time              `json:"end_time"`
-			}{
-				toMapSlice,
-				startTimeSlice,
-				endTimeSlice,
-			}
-			// TODO: 格式 openid-recruit-time，尽量recruit和time对应
 			context.JSON(http.StatusOK, returnStruct)
-		}, &rp)
+		}, &rr)
 	})
 }
 

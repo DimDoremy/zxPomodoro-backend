@@ -146,6 +146,13 @@ func addIntoRecruit(group *gin.RouterGroup) {
 				Recruit: byRedis.(util.Personal).Recruit,
 				Score:   byRedis.(util.Personal).Score,
 			}
+			// 判断是否重复加入，重复加入则返回错误信息并退出
+			for _, v := range tempPersonal.Recruit {
+				if v == rr.Makerid {
+					context.JSON(http.StatusBadRequest, model.MessageBind{Message: "Add failed:Recruit exist!"})
+					return
+				}
+			}
 			// 如果没有加入任何招募，新建招募缓存
 			if tempPersonal.Openid == "" {
 				tempPersonal.Openid = rr.Openid
@@ -224,6 +231,7 @@ func removeFromRecruit(group *gin.RouterGroup) {
 	group.POST("/remove_recruit", func(context *gin.Context) {
 		var rr requests
 		var number = -1
+		var removeId = ""
 		util.JsonBind(context, func() {
 			byRedis := util.GetByRedis([]byte(rr.Openid), PersonalRecruitDb)
 			// 判断interface的变量类型
@@ -250,11 +258,61 @@ func removeFromRecruit(group *gin.RouterGroup) {
 			for index, value := range tempPersonal.Recruit {
 				if value == rr.Makerid {
 					number = index
+					removeId = value
 					break
 				}
 			}
 			// 如果索引位置存在，即数组序号大于等于0
 			if number >= 0 {
+				// 从DB2缓存中删除
+				roomByRedis := util.GetByRedis([]byte(removeId), RoomRecruitDb)
+				// 判断interface的变量类型
+				_, types := roomByRedis.(util.Room)
+				if !types {
+					messageBind := roomByRedis.(model.MessageBind)
+					if messageBind.Message == "Get failed:redigo: nil returned" {
+						byRedis = util.Room{
+							Title:     "",
+							Describe:  "",
+							Openid:    "",
+							Recruit:   nil,
+							StartTime: time.Time{},
+							EndTime:   time.Time{},
+						}
+					} else {
+						context.JSON(http.StatusBadRequest, messageBind)
+						return
+					}
+				} else {
+					removeIndex := -1
+					tempRoom := util.Room{
+						Title:     roomByRedis.(util.Room).Title,
+						Describe:  roomByRedis.(util.Room).Describe,
+						Openid:    roomByRedis.(util.Room).Openid,
+						Recruit:   roomByRedis.(util.Room).Recruit,
+						StartTime: roomByRedis.(util.Room).StartTime,
+						EndTime:   roomByRedis.(util.Room).EndTime,
+					}
+					for i, v := range tempRoom.Recruit {
+						if v == rr.Openid {
+							removeIndex = i
+							break
+						}
+					}
+					tempRoom.Recruit = append(tempRoom.Recruit[:removeIndex], tempRoom.Recruit[removeIndex+1:]...)
+					if len(tempRoom.Recruit) <= 0 {
+						err := util.DeleteFromRedis([]byte(removeId), RoomRecruitDb)
+						if err != nil {
+							context.JSON(http.StatusBadRequest, model.MessageBind{Message: "Delete recruit failed"})
+						}
+						context.JSON(http.StatusOK, model.MessageBind{Message: "Delete success"})
+					} else {
+						newRedis, _ := json.Marshal(tempRoom)
+						util.SetIntoRedis([]byte(removeId), newRedis, RoomRecruitDb)
+						var sessionModel util.Room
+						_ = json.Unmarshal(newRedis, &sessionModel)
+					}
+				}
 				tempPersonal.Recruit = append(tempPersonal.Recruit[:number], tempPersonal.Recruit[number+1:]...)
 				tempPersonal.Score = append(tempPersonal.Score[:number], tempPersonal.Score[number+1:]...)
 				// 如果删除后为空，则将其销毁
@@ -300,6 +358,21 @@ func newRecruitRoom(group *gin.RouterGroup) {
 				util.SetIntoRedis([]byte(rp.Openid), marshal, RoomRecruitDb)
 				// 添加用户至房间
 				getByRedis := util.GetByRedis([]byte(rp.Makerid), PersonalRecruitDb)
+				// 判断interface的变量类型
+				_, types := getByRedis.(util.Personal)
+				if !types {
+					messageBind := getByRedis.(model.MessageBind)
+					if messageBind.Message == "Get failed:redigo: nil returned" {
+						getByRedis = util.Personal{
+							Openid:  "",
+							Recruit: []string{},
+							Score:   []int64{},
+						}
+					} else {
+						context.JSON(http.StatusBadRequest, messageBind)
+						return
+					}
+				}
 				recruitByRedis := getByRedis.(util.Personal).Recruit
 				scoreByRedis := getByRedis.(util.Personal).Score
 				recruitByRedis = append(recruitByRedis, rp.Openid)
@@ -335,10 +408,10 @@ func deleteRecruitRoom(group *gin.RouterGroup) {
 				for _, v := range byRedis.(util.Room).Recruit {
 					personalByRedis := util.GetByRedis([]byte(v), PersonalRecruitDb)
 					// 判断interface的变量类型
-					_, types := byRedis.(util.Personal)
+					_, types := personalByRedis.(util.Personal)
 					fmt.Println(personalByRedis)
 					if !types {
-						messageBind := byRedis.(model.MessageBind)
+						messageBind := personalByRedis.(model.MessageBind)
 						if messageBind.Message == "Get failed:redigo: nil returned" {
 							byRedis = util.Personal{
 								Openid:  "",
@@ -373,7 +446,7 @@ func deleteRecruitRoom(group *gin.RouterGroup) {
 								context.JSON(http.StatusBadRequest, model.MessageBind{Message: "Delete recruit failed"})
 							}
 							context.JSON(http.StatusOK, model.MessageBind{Message: "Delete success"})
-							return
+							break
 						}
 						newRedis, _ := json.Marshal(tempPersonal)
 						util.SetIntoRedis([]byte(rp.Openid), newRedis, PersonalRecruitDb)
@@ -484,35 +557,50 @@ func publicRecruitInit(group *gin.RouterGroup) {
 			dao.DB.Table("recruitPublic").Find(&rp)
 			indexPublic := 0
 			indexSpecial := 0
-			var publicId []string
-			publicId = []string{}
-			var rankPublic []int
-			rankPublic = []int{}
-			var specialId []string
-			specialId = []string{}
-			var rankSpecial []int
-			rankSpecial = []int{}
+			publicTitle := make([]string, 10)
+			publicDescribe := make([]string, 10)
+			publicId := make([]string, 10)
+			rankPublic := make([]int, 10)
+			specialTitle := make([]string, 10)
+			specialDescribe := make([]string, 10)
+			specialId := make([]string, 10)
+			rankSpecial := make([]int, 10)
 			for _, value := range rp {
 				if value.IsOpen && !value.IsSpecial {
+					publicTitle[indexPublic] = value.Title
+					publicDescribe[indexPublic] = value.Describe
 					publicId[indexPublic] = value.Mission
 					rankPublic[indexPublic] = value.Rank
 					indexPublic++
 				} else if value.IsOpen && value.IsSpecial {
+					specialTitle[indexSpecial] = value.Title
+					specialDescribe[indexSpecial] = value.Describe
 					specialId[indexSpecial] = value.Mission
 					rankSpecial[indexSpecial] = value.Rank
 					indexSpecial++
 				}
 			}
+			type tmpRecruit struct {
+				Title    []string `json:"title"`
+				Describe []string `json:"describe"`
+				Id       []string `json:"id"`
+				Rank     []int    `json:"rank"`
+			}
 			returnStruct := struct {
-				PublicId    []string `json:"public_id"`
-				PublicRank  []int    `json:"public_rank"`
-				SpecialId   []string `json:"special_id"`
-				SpecialRank []int    `json:"special_rank"`
+				Public  tmpRecruit `json:"public"`
+				Special tmpRecruit `json:"special"`
 			}{
-				PublicId:    publicId,
-				PublicRank:  rankPublic,
-				SpecialId:   specialId,
-				SpecialRank: rankSpecial,
+				tmpRecruit{
+					Title:    publicTitle,
+					Describe: publicDescribe,
+					Id:       publicId,
+					Rank:     rankPublic,
+				}, tmpRecruit{
+					Title:    specialTitle,
+					Describe: specialDescribe,
+					Id:       specialId,
+					Rank:     rankSpecial,
+				},
 			}
 			context.JSON(http.StatusOK, returnStruct)
 		}, &rr)

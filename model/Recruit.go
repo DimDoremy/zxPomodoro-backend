@@ -13,9 +13,11 @@ func (RecruitPublic) TableName() string { return "recruitPublic" }
 
 // 个人招募结构体
 type RequestPersonal struct {
-	Openid  string `json:"openid"`
-	Makerid string `json:"makerid"`
-	Time    int64  `json:"time"`
+	Title    string `json:"title"`
+	Describe string `json:"describe"`
+	Openid   string `json:"openid"`
+	Makerid  string `json:"makerid"`
+	Time     int64  `json:"time"`
 }
 
 // 公共招募结构体

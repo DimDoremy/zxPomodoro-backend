@@ -19,6 +19,8 @@ type Personal struct {
 
 // Room结构体
 type Room struct {
+	Title     string    `json:"title"`
+	Describe  string    `json:"describe"`
 	Openid    string    `json:"openid"`
 	Recruit   []string  `json:"recruit"`
 	StartTime time.Time `json:"start_time"`

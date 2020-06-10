@@ -23,8 +23,8 @@ POST http://localhost:8848/api/accept_recruit
 Content-Type: application/json
 
 {
-  "openid": "abc",
-  "makerid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
+  "openid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
+  "makerid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
   "time": 5000
 }
 
@@ -73,8 +73,8 @@ POST http://localhost:8848/api/delete_room
 Content-Type: application/json
 
 {
-  "openid": "abc",
-  "makerid": "abc",
+  "openid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
+  "makerid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
   "time": 3600
 }
 
@@ -83,8 +83,10 @@ POST http://localhost:8848/api/new_room
 Content-Type: application/json
 
 {
-  "openid": "abc",
-  "makerid": "abc",
+  "title": "title",
+  "describe": "describe",
+  "openid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
+  "makerid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
   "time": 3600
 }
 
@@ -131,6 +133,7 @@ Content-Type: application/json
   "makerid": "bcdef",
   "sessionKey": "session"
 }
+
 ###
 
 POST http://localhost:8848/api/openid

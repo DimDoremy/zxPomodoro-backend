@@ -2,6 +2,7 @@ package routers
 
 import (
 	"encoding/json"
+	"fmt"
 	"gin_spring/dao"
 	"gin_spring/model"
 	"gin_spring/util"
@@ -19,9 +20,11 @@ const (
 
 // 客户端请求使用的结构体
 type requests struct {
-	Openid  string `json:"openid"`
-	Makerid string `json:"makerid"`
-	Time    int64  `json:"time"`
+	Title    string `json:"title"`
+	Describe string `json:"describe"`
+	Openid   string `json:"openid"`
+	Makerid  string `json:"makerid"`
+	Time     int64  `json:"time"`
 }
 
 // 展示所有的redis缓存
@@ -78,7 +81,6 @@ func showRedisRecruit(group *gin.RouterGroup) {
 	})
 }
 
-// TODO: 返回对应用户的缓存
 // 返回所有的redis缓存
 func returnRedisRecruit(group *gin.RouterGroup) {
 	var rr requests
@@ -199,6 +201,8 @@ func addIntoRecruit(group *gin.RouterGroup) {
 				recruitByRedis := getByRedis.(util.Room).Recruit
 				recruitByRedis = append(recruitByRedis, rr.Openid)
 				room := util.Room{
+					Title:     getByRedis.(util.Room).Title,
+					Describe:  getByRedis.(util.Room).Describe,
 					Openid:    getByRedis.(util.Room).Openid,
 					Recruit:   recruitByRedis,
 					StartTime: getByRedis.(util.Room).StartTime,
@@ -285,6 +289,8 @@ func newRecruitRoom(group *gin.RouterGroup) {
 				recruitSlice := []string{rp.Openid}
 				// 构建Room
 				makerModel := util.Room{
+					Title:     rp.Title,                                          // 用户新建招募的标题
+					Describe:  rp.Describe,                                       // 用户新建招募的描述
 					Openid:    rp.Openid,                                         // 用户的openid
 					Recruit:   recruitSlice,                                      // 将要加入的人员
 					StartTime: nowTime,                                           // 开始时间
@@ -330,6 +336,7 @@ func deleteRecruitRoom(group *gin.RouterGroup) {
 					personalByRedis := util.GetByRedis([]byte(v), PersonalRecruitDb)
 					// 判断interface的变量类型
 					_, types := byRedis.(util.Personal)
+					fmt.Println(personalByRedis)
 					if !types {
 						messageBind := byRedis.(model.MessageBind)
 						if messageBind.Message == "Get failed:redigo: nil returned" {
@@ -468,6 +475,50 @@ func completeRecruit(group *gin.RouterGroup) {
 	})
 }
 
+// 公共 活动 招募的读取
+func publicRecruitInit(group *gin.RouterGroup) {
+	group.POST("/init_recruit", func(context *gin.Context) {
+		var rr requests
+		util.JsonBind(context, func() {
+			var rp []model.RecruitPublic
+			dao.DB.Table("recruitPublic").Find(&rp)
+			indexPublic := 0
+			indexSpecial := 0
+			var publicId []string
+			publicId = []string{}
+			var rankPublic []int
+			rankPublic = []int{}
+			var specialId []string
+			specialId = []string{}
+			var rankSpecial []int
+			rankSpecial = []int{}
+			for _, value := range rp {
+				if value.IsOpen && !value.IsSpecial {
+					publicId[indexPublic] = value.Mission
+					rankPublic[indexPublic] = value.Rank
+					indexPublic++
+				} else if value.IsOpen && value.IsSpecial {
+					specialId[indexSpecial] = value.Mission
+					rankSpecial[indexSpecial] = value.Rank
+					indexSpecial++
+				}
+			}
+			returnStruct := struct {
+				PublicId    []string `json:"public_id"`
+				PublicRank  []int    `json:"public_rank"`
+				SpecialId   []string `json:"special_id"`
+				SpecialRank []int    `json:"special_rank"`
+			}{
+				PublicId:    publicId,
+				PublicRank:  rankPublic,
+				SpecialId:   specialId,
+				SpecialRank: rankSpecial,
+			}
+			context.JSON(http.StatusOK, returnStruct)
+		}, &rr)
+	})
+}
+
 func RecruitRouters(router *gin.Engine) {
 	recruitGroup := router.Group("/api")
 	{
@@ -479,5 +530,6 @@ func RecruitRouters(router *gin.Engine) {
 		deleteRecruitRoom(recruitGroup)
 		acceptRecruit(recruitGroup)
 		completeRecruit(recruitGroup)
+		publicRecruitInit(recruitGroup)
 	}
 }

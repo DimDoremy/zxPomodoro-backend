@@ -1,3 +1,13 @@
+POST http://localhost:8848/api/check_room
+Content-Type: application/json
+
+{
+  "openid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
+  "makerid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
+  "time": 5000
+}
+
+###
 POST http://localhost:8848/api/init_recruit
 Content-Type: application/json
 
@@ -39,8 +49,8 @@ POST http://localhost:8848/api/return_recruit
 Content-Type: application/json
 
 {
-  "openid": "abc",
-  "makerid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
+  "openid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
+  "makerid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
   "time": 3600
 }
 
@@ -60,7 +70,7 @@ Content-Type: application/json
 
 {
   "openid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
-  "makerid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
+  "makerid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
   "time": 3600
 }
 
@@ -69,8 +79,8 @@ POST http://localhost:8848/api/add_into_recruit
 Content-Type: application/json
 
 {
-  "openid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
-  "makerid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
+  "openid": "oVQwG5m7BRyQSWpeRqnmroB-rWa8",
+  "makerid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
   "time": 3600
 }
 
@@ -91,6 +101,7 @@ Content-Type: application/json
 {
   "title": "title",
   "describe": "describe",
+  "url": "https://cn.bing.com",
   "openid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
   "makerid": "oVQwG5o9J5YP9nOY-aYnngQAFS-8",
   "time": 3600

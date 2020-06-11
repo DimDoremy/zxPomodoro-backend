@@ -17,6 +17,7 @@ func (RecruitPublic) TableName() string { return "recruitPublic" }
 type RequestPersonal struct {
 	Title    string `json:"title"`
 	Describe string `json:"describe"`
+	Url      string `json:"url"`
 	Openid   string `json:"openid"`
 	Makerid  string `json:"makerid"`
 	Time     int64  `json:"time"`

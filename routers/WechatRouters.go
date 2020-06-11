@@ -19,8 +19,6 @@ func WechatRouter(router *gin.Engine) {
 	var code userCode
 	APPID := "wxb5ffc058d0c82c22"
 	SECRET := "27735d75d1fe375f83c99b993f541f28"
-	//APPID := "wx451e415a7b9a69bf"
-	//SECRET := "1f5dbde56e2e6edbe7af882e4d83e8fa"
 	router.POST("/api/openid", func(context *gin.Context) {
 		util.JsonBind(context, func() {
 			wechatLoginUrl := "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + code.Code + "&grant_type=authorization_code"

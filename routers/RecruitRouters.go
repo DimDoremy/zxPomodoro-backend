@@ -87,10 +87,16 @@ func returnRedisRecruit(group *gin.RouterGroup) {
 	group.POST("/return_recruit", func(context *gin.Context) {
 		returnStruct := struct {
 			Recruits   util.Personal `json:"recruits"`
+			Titles     []string      `json:"titles"`
+			Describes  []string      `json:"describes"`
+			Urls       []string      `json:"urls"`
 			StartTimes []time.Time   `json:"start_times"`
 			EndTimes   []time.Time   `json:"end_times"`
 		}{
 			util.Personal{},
+			[]string{},
+			[]string{},
+			[]string{},
 			[]time.Time{},
 			[]time.Time{},
 		}
@@ -112,6 +118,9 @@ func returnRedisRecruit(group *gin.RouterGroup) {
 					context.JSON(http.StatusBadRequest, messageBind)
 					return
 				}
+				returnStruct.Titles = append(returnStruct.Titles, room.(util.Room).Title)
+				returnStruct.Describes = append(returnStruct.Describes, room.(util.Room).Describe)
+				returnStruct.Urls = append(returnStruct.Urls, room.(util.Room).Url)
 				returnStruct.StartTimes = append(returnStruct.StartTimes, room.(util.Room).StartTime)
 				returnStruct.EndTimes = append(returnStruct.EndTimes, room.(util.Room).EndTime)
 			}
@@ -205,11 +214,22 @@ func addIntoRecruit(group *gin.RouterGroup) {
 				_ = json.Unmarshal(newRedis, &sessionModel)
 				// 添加用户至房间
 				getByRedis := util.GetByRedis([]byte(rr.Makerid), RoomRecruitDb)
+				_, typeTmp := getByRedis.(util.Room)
+				if !typeTmp {
+					messageBind := getByRedis.(model.MessageBind)
+					if messageBind.Message == "Get failed:redigo: nil returned" {
+						getByRedis = util.Room{}
+					} else {
+						context.JSON(http.StatusBadRequest, messageBind)
+						return
+					}
+				}
 				recruitByRedis := getByRedis.(util.Room).Recruit
 				recruitByRedis = append(recruitByRedis, rr.Openid)
 				room := util.Room{
 					Title:     getByRedis.(util.Room).Title,
 					Describe:  getByRedis.(util.Room).Describe,
+					Url:       getByRedis.(util.Room).Url,
 					Openid:    getByRedis.(util.Room).Openid,
 					Recruit:   recruitByRedis,
 					StartTime: getByRedis.(util.Room).StartTime,
@@ -274,6 +294,7 @@ func removeFromRecruit(group *gin.RouterGroup) {
 						byRedis = util.Room{
 							Title:     "",
 							Describe:  "",
+							Url:       "",
 							Openid:    "",
 							Recruit:   nil,
 							StartTime: time.Time{},
@@ -288,6 +309,7 @@ func removeFromRecruit(group *gin.RouterGroup) {
 					tempRoom := util.Room{
 						Title:     roomByRedis.(util.Room).Title,
 						Describe:  roomByRedis.(util.Room).Describe,
+						Url:       roomByRedis.(util.Room).Url,
 						Openid:    roomByRedis.(util.Room).Openid,
 						Recruit:   roomByRedis.(util.Room).Recruit,
 						StartTime: roomByRedis.(util.Room).StartTime,
@@ -349,10 +371,25 @@ func newRecruitRoom(group *gin.RouterGroup) {
 				makerModel := util.Room{
 					Title:     rp.Title,                                          // 用户新建招募的标题
 					Describe:  rp.Describe,                                       // 用户新建招募的描述
+					Url:       rp.Url,                                            // 招募房间的用户头像
 					Openid:    rp.Openid,                                         // 用户的openid
 					Recruit:   recruitSlice,                                      // 将要加入的人员
 					StartTime: nowTime,                                           // 开始时间
 					EndTime:   nowTime.Add(time.Duration(rp.Time) * time.Second), // 结束时间，通过发来的time初始化
+				}
+				byRedis := util.GetByRedis([]byte(rp.Openid), RoomRecruitDb)
+				_, typeTmp := byRedis.(util.Room)
+				if !typeTmp {
+					messageBind := byRedis.(model.MessageBind)
+					if messageBind.Message == "Get failed:redigo: nil returned" {
+						byRedis = util.Room{}
+					} else {
+						context.JSON(http.StatusBadRequest, messageBind)
+						return
+					}
+				} else if byRedis.(util.Room).Openid == rp.Openid {
+					context.JSON(http.StatusBadRequest, model.MessageBind{Message: "Room exist!"})
+					return
 				}
 				marshal, _ := json.Marshal(makerModel)
 				util.SetIntoRedis([]byte(rp.Openid), marshal, RoomRecruitDb)
@@ -413,7 +450,7 @@ func deleteRecruitRoom(group *gin.RouterGroup) {
 					if !types {
 						messageBind := personalByRedis.(model.MessageBind)
 						if messageBind.Message == "Get failed:redigo: nil returned" {
-							byRedis = util.Personal{
+							personalByRedis = util.Personal{
 								Openid:  "",
 								Recruit: []string{},
 								Score:   []int64{},
@@ -607,6 +644,40 @@ func publicRecruitInit(group *gin.RouterGroup) {
 	})
 }
 
+// 检查房间存在
+func checkRecruitRoom(group *gin.RouterGroup) {
+	group.POST("/check_room", func(context *gin.Context) {
+		var rr requests
+		var newRedis []byte
+		util.JsonBind(context, func() {
+			byRedis := util.GetByRedis([]byte(rr.Openid), PersonalRecruitDb)
+			_, types := byRedis.(util.Personal)
+			if !types {
+				messageBind := byRedis.(model.MessageBind)
+				context.JSON(http.StatusBadRequest, messageBind)
+				return
+			} else {
+				tempStruct := byRedis.(util.Personal)
+				tempRecruit := tempStruct.Recruit
+				tempScore := tempStruct.Score
+				for i, v := range tempRecruit {
+					getByRedis := util.GetByRedis([]byte(v), RoomRecruitDb)
+					_, typeTmp := getByRedis.(util.Room)
+					if !typeTmp {
+						tempRecruit = append(tempRecruit[:i], tempRecruit[i+1:]...)
+						tempScore = append(tempScore[:i], tempScore[i+1:]...)
+					}
+				}
+				tempStruct.Recruit = tempRecruit
+				tempStruct.Score = tempScore
+				newRedis, _ = json.Marshal(tempStruct)
+				util.SetIntoRedis([]byte(rr.Openid), newRedis, PersonalRecruitDb)
+				context.JSON(http.StatusOK, tempStruct)
+			}
+		}, &rr)
+	})
+}
+
 func RecruitRouters(router *gin.Engine) {
 	recruitGroup := router.Group("/api")
 	{
@@ -619,5 +690,6 @@ func RecruitRouters(router *gin.Engine) {
 		acceptRecruit(recruitGroup)
 		completeRecruit(recruitGroup)
 		publicRecruitInit(recruitGroup)
+		checkRecruitRoom(recruitGroup)
 	}
 }

@@ -81,7 +81,15 @@ func showRedisRecruit(group *gin.RouterGroup) {
 	})
 }
 
-// 返回所有的redis缓存
+// returnRedisRecruit doc
+// @Summary 恢复客户端所有的redis缓存
+// @Tags recruit-routers
+// @Accept json
+// @Produce json
+// @Param handBook body requests true "招募请求"
+// @Success 200
+// @Failure 400 {object} model.MessageBind "错误信息"
+// @Router /return_recruit [post]
 func returnRedisRecruit(group *gin.RouterGroup) {
 	var rr requests
 	group.POST("/return_recruit", func(context *gin.Context) {
@@ -129,7 +137,15 @@ func returnRedisRecruit(group *gin.RouterGroup) {
 	})
 }
 
-// 添加招募进入redis缓存
+// addIntoRecruit doc
+// @Summary 添加招募进入redis缓存
+// @Tags recruit-routers
+// @Accept json
+// @Produce json
+// @Param handBook body requests true "招募请求"
+// @Success 200
+// @Failure 400 {object} model.MessageBind "错误信息"
+// @Router /add_into_recruit [post]
 func addIntoRecruit(group *gin.RouterGroup) {
 	group.POST("/add_into_recruit", func(context *gin.Context) {
 		var rr requests
@@ -246,7 +262,15 @@ func addIntoRecruit(group *gin.RouterGroup) {
 	})
 }
 
-// 从redis缓存退出招募
+// removeFromRecruit doc
+// @Summary 从redis缓存退出招募
+// @Tags recruit-routers
+// @Accept json
+// @Produce json
+// @Param handBook body requests true "招募请求"
+// @Success 200
+// @Failure 400 {object} model.MessageBind "错误信息"
+// @Router /remove_recruit [post]
 func removeFromRecruit(group *gin.RouterGroup) {
 	group.POST("/remove_recruit", func(context *gin.Context) {
 		var rr requests
@@ -358,7 +382,15 @@ func removeFromRecruit(group *gin.RouterGroup) {
 	})
 }
 
-// 建立招募房间到redis缓存
+// newRecruitRoom doc
+// @Summary 建立招募房间到redis缓存
+// @Tags recruit-routers
+// @Accept json
+// @Produce json
+// @Param handBook body requests true "招募请求"
+// @Success 200
+// @Failure 400 {object} model.MessageBind "错误信息"
+// @Router /new_room [post]
 func newRecruitRoom(group *gin.RouterGroup) {
 	group.POST("/new_room", func(context *gin.Context) {
 		nowTime := time.Now()
@@ -429,7 +461,15 @@ func newRecruitRoom(group *gin.RouterGroup) {
 	})
 }
 
-// 从redis缓存销毁招募房间
+// deleteRecruitRoom doc
+// @Summary 从redis缓存销毁招募房间
+// @Tags recruit-routers
+// @Accept json
+// @Produce json
+// @Param handBook body requests true "招募请求"
+// @Success 200
+// @Failure 400 {object} model.MessageBind "错误信息"
+// @Router /delete_room [post]
 func deleteRecruitRoom(group *gin.RouterGroup) {
 	group.POST("/delete_room", func(context *gin.Context) {
 		nowTime := time.Now()
@@ -501,7 +541,15 @@ func deleteRecruitRoom(group *gin.RouterGroup) {
 	})
 }
 
-// 接收客户端完成的积分
+// acceptRecruit doc
+// @Summary 接收客户端完成的积分
+// @Tags recruit-routers
+// @Accept json
+// @Produce json
+// @Param handBook body requests true "招募请求"
+// @Success 200
+// @Failure 400 {object} model.MessageBind "错误信息"
+// @Router /accept_recruit [post]
 func acceptRecruit(group *gin.RouterGroup) {
 	group.POST("/accept_recruit", func(context *gin.Context) {
 		var rr requests
@@ -536,7 +584,15 @@ func acceptRecruit(group *gin.RouterGroup) {
 	})
 }
 
-// 结算请求
+// completeRecruit doc
+// @Summary 结算请求
+// @Tags recruit-routers
+// @Accept json
+// @Produce json
+// @Param handBook body requests true "招募请求"
+// @Success 200
+// @Failure 400 {object} model.MessageBind "错误信息"
+// @Router /complete_recruit [post]
 func completeRecruit(group *gin.RouterGroup) {
 	group.POST("/complete_recruit", func(context *gin.Context) {
 		var rr requests
@@ -567,8 +623,8 @@ func completeRecruit(group *gin.RouterGroup) {
 				return
 			}
 			roomValue := reflect.ValueOf(byRedis)
-			roomStart := roomValue.Field(2).Interface().(time.Time)
-			roomEnd := roomValue.Field(3).Interface().(time.Time)
+			roomStart, _ := roomValue.Field(5).Interface().(time.Time)
+			roomEnd, _ := roomValue.Field(6).Interface().(time.Time)
 			returnStruct := struct {
 				Openid      string        `json:"openid"`
 				Makerid     string        `json:"makerid"`
@@ -585,7 +641,15 @@ func completeRecruit(group *gin.RouterGroup) {
 	})
 }
 
-// 公共 活动 招募的读取
+// publicRecruitInit doc
+// @Summary 公共 活动 招募的读取
+// @Tags recruit-routers
+// @Accept json
+// @Produce json
+// @Param handBook body requests true "招募请求"
+// @Success 200
+// @Failure 400 {object} model.MessageBind "错误信息"
+// @Router /init_recruit [post]
 func publicRecruitInit(group *gin.RouterGroup) {
 	group.POST("/init_recruit", func(context *gin.Context) {
 		var rr requests
@@ -644,7 +708,15 @@ func publicRecruitInit(group *gin.RouterGroup) {
 	})
 }
 
-// 检查房间存在
+// checkRecruitRoom doc
+// @Summary 检查房间存在
+// @Tags recruit-routers
+// @Accept json
+// @Produce json
+// @Param handBook body requests true "招募请求"
+// @Success 200
+// @Failure 400 {object} model.MessageBind "错误信息"
+// @Router /check_room [post]
 func checkRecruitRoom(group *gin.RouterGroup) {
 	group.POST("/check_room", func(context *gin.Context) {
 		var rr requests

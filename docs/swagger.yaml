@@ -24,51 +24,69 @@ definitions:
       message:
         type: string
     type: object
-  model.RecruitBlock:
+  model.UserData:
     properties:
-      bossid:
+      avatarurl:
+        type: string
+      experience:
         type: integer
-      bosslife:
+      lifepoint:
         type: integer
+      nickname:
+        type: string
+      openid:
+        type: string
+      soul:
+        type: integer
+      time:
+        type: integer
+    type: object
+  model.UserPiece:
+    properties:
+      donghuangzhong:
+        type: integer
+      fuxiqin:
+        type: integer
+      haotianta:
+        type: integer
+      kongtongyin:
+        type: integer
+      kunlunjing:
+        type: integer
+      lianyaohu:
+        type: integer
+      nvwashi:
+        type: integer
+      openid:
+        type: string
+      pangufu:
+        type: integer
+      shennongding:
+        type: integer
+      xuanyuanjian:
+        type: integer
+    type: object
+  routers.requests:
+    properties:
+      describe:
+        type: string
       makerid:
         type: string
-    type: object
-  model.RecruitList:
-    properties:
-      gamer1:
+      openid:
         type: string
-      gamer2:
-        type: string
-      gamer3:
-        type: string
-      makerid:
-        type: string
-    type: object
-  routers.recruitJSON:
-    properties:
-      bossid:
+      time:
         type: integer
-      bosslife:
-        type: integer
-      gamer1:
-        type: string
-      gamer2:
-        type: string
-      gamer3:
-        type: string
-      makerid:
+      title:
         type: string
     type: object
-  routers.recruits:
+  routers.userCode:
     properties:
-      blocks:
-        items:
-          $ref: '#/definitions/model.RecruitBlock'
-        type: array
-      lists:
-        items:
-          $ref: '#/definitions/model.RecruitList'
-        type: array
+      code:
+        type: string
+      openid:
+        type: string
+      session_key:
+        type: string
     type: object
 host: 127.0.0.1:8848
 info:
@@ -80,38 +98,114 @@ info:
   title: 知夕后台Api接口
   version: 1.0-golang
 paths:
-  /allhandbook:
-    get:
-      description: 用于测试的Api，请不要在正式开发中使用
+  /accept_recruit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招募请求
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/routers.requests'
       produces:
       - application/json
       responses:
-        "200":
-          description: 获取到的全部数据库条目
+        "200": {}
+        "400":
+          description: 错误信息
           schema:
-            $ref: '#/definitions/model.HandBook'
-        "404":
-          description: 404 not found
-          schema:
-            type: string
-      summary: 获取全部用户图鉴列表
+            $ref: '#/definitions/model.MessageBind'
+      summary: 接收客户端完成的积分
       tags:
-      - book-routers
-  /allrecruit:
-    get:
-      description: 用于测试的Api，请不要在正式开发中使用
+      - recruit-routers
+  /add_into_recruit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招募请求
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/routers.requests'
       produces:
       - application/json
       responses:
-        "200":
-          description: 获取到的全部数据库条目
+        "200": {}
+        "400":
+          description: 错误信息
           schema:
-            $ref: '#/definitions/routers.recruits'
-        "404":
-          description: 404 not found
+            $ref: '#/definitions/model.MessageBind'
+      summary: 添加招募进入redis缓存
+      tags:
+      - recruit-routers
+  /check_room:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招募请求
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/routers.requests'
+      produces:
+      - application/json
+      responses:
+        "200": {}
+        "400":
+          description: 错误信息
           schema:
-            type: string
-      summary: 获取全部用户图鉴列表
+            $ref: '#/definitions/model.MessageBind'
+      summary: 检查房间存在
+      tags:
+      - recruit-routers
+  /complete_recruit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招募请求
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/routers.requests'
+      produces:
+      - application/json
+      responses:
+        "200": {}
+        "400":
+          description: 错误信息
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 结算请求
+      tags:
+      - recruit-routers
+  /delete_room:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招募请求
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/routers.requests'
+      produces:
+      - application/json
+      responses:
+        "200": {}
+        "400":
+          description: 错误信息
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 从redis缓存销毁招募房间
       tags:
       - recruit-routers
   /deletehandbook:
@@ -129,7 +223,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 单个用户信息的背包json数据
+          description: 删除成功
           schema:
             $ref: '#/definitions/model.MessageBind'
         "400":
@@ -139,6 +233,56 @@ paths:
       summary: 删除图鉴数据库的指定条目
       tags:
       - book-routers
+  /deleteuserdata:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新的用户信息
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+        "400":
+          description: 400 bad request
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 更新单个用户信息
+      tags:
+      - user-routers
+  /deleteuserpiece:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 单个用户信息
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserPiece'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+        "400":
+          description: 删除失败
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 删除背包数据库指定条目
+      tags:
+      - piece-routers
   /handbookbyopenid:
     post:
       consumes:
@@ -154,7 +298,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 单个用户信息的背包json数据
+          description: 单个用户图鉴信息的json数据
           schema:
             $ref: '#/definitions/model.HandBook'
         "400":
@@ -164,6 +308,28 @@ paths:
       summary: 获取单个用户图鉴列表信息
       tags:
       - book-routers
+  /init_recruit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招募请求
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/routers.requests'
+      produces:
+      - application/json
+      responses:
+        "200": {}
+        "400":
+          description: 错误信息
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 公共 活动 招募的读取
+      tags:
+      - recruit-routers
   /inserthandbook:
     post:
       consumes:
@@ -181,7 +347,7 @@ paths:
         "200":
           description: 注册成功
           schema:
-            $ref: '#/definitions/model.HandBook'
+            $ref: '#/definitions/model.MessageBind'
         "400":
           description: 注册失败
           schema:
@@ -189,17 +355,17 @@ paths:
       summary: 注册新用户新建图鉴信息
       tags:
       - book-routers
-  /insertrecruit:
+  /insertuserdata:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 注册新招募板信息
+      - description: 注册用户信息
         in: body
         name: handBook
         required: true
         schema:
-          $ref: '#/definitions/routers.recruitJSON'
+          $ref: '#/definitions/model.UserData'
       produces:
       - application/json
       responses:
@@ -211,10 +377,83 @@ paths:
           description: 注册失败
           schema:
             $ref: '#/definitions/model.MessageBind'
-      summary: 注册新招募板信息
+      summary: 注册单个用户
+      tags:
+      - user-routers
+  /insertuserpiece:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 单个用户背包信息
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserPiece'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 注册成功
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+        "400":
+          description: 注册失败
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 注册单个用户，新建背包
+      tags:
+      - piece-routers
+  /new_room:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招募请求
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/routers.requests'
+      produces:
+      - application/json
+      responses:
+        "200": {}
+        "400":
+          description: 错误信息
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 建立招募房间到redis缓存
       tags:
       - recruit-routers
-  /recruitbymakerid:
+  /openid:
+    post:
+      consumes:
+      - application/json
+      description: 用于服务器请求微信服务器进行用户登录授权使用
+      parameters:
+      - description: 用户的登录包
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/routers.userCode'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求结果
+          schema:
+            $ref: '#/definitions/routers.userCode'
+        "400":
+          description: 请求没到达
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 请求微信登录授权
+      tags:
+      - wechat-router
+  /piecebyopenid:
     post:
       consumes:
       - application/json
@@ -224,19 +463,84 @@ paths:
         name: handBook
         required: true
         schema:
-          $ref: '#/definitions/routers.recruitJSON'
+          $ref: '#/definitions/model.UserPiece'
       produces:
       - application/json
       responses:
         "200":
-          description: 单个用户信息的背包json数据
+          description: 单个用户信息的json数据
           schema:
-            $ref: '#/definitions/routers.recruitJSON'
+            $ref: '#/definitions/model.UserPiece'
+      summary: 获取单个用户背包信息
+      tags:
+      - piece-routers
+  /querybyopenid:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 单个用户信息
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 单个用户信息的json数据
+          schema:
+            $ref: '#/definitions/model.UserData'
         "400":
           description: 400 bad request
           schema:
             $ref: '#/definitions/model.MessageBind'
-      summary: 获取单个用户图鉴列表信息
+      summary: 获取单个用户信息
+      tags:
+      - user-routers
+  /remove_recruit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招募请求
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/routers.requests'
+      produces:
+      - application/json
+      responses:
+        "200": {}
+        "400":
+          description: 错误信息
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 从redis缓存退出招募
+      tags:
+      - recruit-routers
+  /return_recruit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招募请求
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/routers.requests'
+      produces:
+      - application/json
+      responses:
+        "200": {}
+        "400":
+          description: 错误信息
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 恢复客户端所有的redis缓存
       tags:
       - recruit-routers
   /updatehandbook:
@@ -244,7 +548,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 更新用户信息
+      - description: 更新的用户信息
         in: body
         name: handBook
         required: true
@@ -254,7 +558,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 单个用户信息的背包json数据
+          description: 更新成功
           schema:
             $ref: '#/definitions/model.MessageBind'
         "400":
@@ -264,4 +568,54 @@ paths:
       summary: 更新单个用户图鉴信息
       tags:
       - book-routers
+  /updateuserdata:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新的用户信息
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+        "400":
+          description: 400 bad request
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 更新单个用户信息
+      tags:
+      - user-routers
+  /updateuserpiece:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新的用户背包信息
+        in: body
+        name: handBook
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserPiece'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+        "400":
+          description: 更新失败
+          schema:
+            $ref: '#/definitions/model.MessageBind'
+      summary: 更新单个用户背包信息
+      tags:
+      - piece-routers
 swagger: "2.0"

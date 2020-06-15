@@ -5,25 +5,6 @@ import (
 	"time"
 )
 
-//var Conn redis.Conn
-//
-////连接redis
-//func LinkRedis() {
-//	var err error
-//	Conn, err = redis.Dial("tcp", "47.104.253.11:6379")
-//	if err != nil {
-//		log.Println("Redis connection failed:", err.Error())
-//	}
-//}
-//
-////关闭redis
-//func CloseRedis() {
-//	err := Conn.Close()
-//	if err != nil {
-//		log.Println("Redis close failed:", err.Error())
-//	}
-//}
-
 //使用redis连接池
 var Pool *redis.Pool
 
@@ -51,7 +32,7 @@ func InitRedisPool() {
 			_, err := c.Do("PING")
 			return err
 		},
-		MaxIdle:         8,                //最大空闲连接处，打开16个连接并保持
+		MaxIdle:         8,                 //最大空闲连接处，打开16个连接并保持
 		MaxActive:       100000,            //最大激活连接数，0为自动按需分配
 		IdleTimeout:     300 * time.Second, //最大空闲等待时间，超过后空闲连接将会关闭
 		Wait:            true,              //当链接数达到最大后是否阻塞，如果不的话，达到最大后返回错误

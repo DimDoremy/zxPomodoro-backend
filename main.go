@@ -54,7 +54,6 @@ func main() {
 	routers.BookRouter(r)
 	routers.RecruitRouters(r)
 	routers.WechatRouter(r)
-	routers.BackendRouters(r)
 
 	// 启动框架并判断运行是否成功
 	err = r.Run(":8848")

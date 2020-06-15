@@ -3,6 +3,7 @@ package routers
 import (
 	"encoding/json"
 	"fmt"
+	"gin_spring/model"
 	"gin_spring/util"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
@@ -15,6 +16,16 @@ type userCode struct {
 	SessionKey string `json:"session_key"`
 }
 
+// WechatRouter doc
+// @Summary 请求微信登录授权
+// @Description 用于服务器请求微信服务器进行用户登录授权使用
+// @Tags wechat-router
+// @Accept json
+// @Produce json
+// @Param handBook body userCode true "用户的登录包"
+// @Success 200 {object} userCode "请求结果"
+// @Failure 400 {object} model.MessageBind "请求没到达"
+// @Router /openid [post]
 func WechatRouter(router *gin.Engine) {
 	var code userCode
 	APPID := "wxb5ffc058d0c82c22"
@@ -30,6 +41,10 @@ func WechatRouter(router *gin.Engine) {
 			response, err = http.DefaultClient.Do(request)
 			if err != nil {
 				fmt.Println(err.Error())
+			}
+			if response == nil {
+				context.JSON(http.StatusBadRequest, model.MessageBind{Message: "request failed!"})
+				return
 			}
 			defer response.Body.Close()
 			body, _ := ioutil.ReadAll(response.Body)

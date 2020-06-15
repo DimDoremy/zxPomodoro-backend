@@ -9,14 +9,6 @@ import (
 	"net/http"
 )
 
-// getAllHandBook doc
-// @Summary 获取全部用户图鉴列表
-// @Description 用于测试的Api，请不要在正式开发中使用
-// @Tags book-routers
-// @Produce json
-// @Success 200 {object} model.HandBook "获取到的全部数据库条目"
-// @Failure 404 {string} string "404 not found"
-// @Router /allhandbook [get]
 func getAllHandBook(group *gin.RouterGroup) {
 	// 测试输出背包数据库全部信息
 	group.GET("/allhandbook", func(context *gin.Context) {
@@ -32,7 +24,7 @@ func getAllHandBook(group *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Param handBook body model.HandBook true "注册用户信息"
-// @Success 200 {object} model.HandBook "注册成功"
+// @Success 200 {object} model.MessageBind "注册成功"
 // @Failure 400 {object} model.MessageBind "注册失败"
 // @Router /inserthandbook [post]
 func insertHandBook(group *gin.RouterGroup) {
@@ -41,8 +33,8 @@ func insertHandBook(group *gin.RouterGroup) {
 		// 定义结构体用于存值
 		var handBook model.HandBook
 		util.JsonBind(context, func() {
-			fmt.Println(handBook)
-			fmt.Println(dao.DB.NewRecord(&handBook))
+			//fmt.Println(handBook)
+			//fmt.Println(dao.DB.NewRecord(&handBook))
 			// 如果绑定成功，执行内容
 			if !dao.DB.NewRecord(&handBook) {
 				// 如果记录不存在，创建新纪录
@@ -64,7 +56,7 @@ func insertHandBook(group *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Param handBook body model.HandBook true "单个用户信息"
-// @Success 200 {object} model.HandBook "单个用户信息的背包json数据"
+// @Success 200 {object} model.HandBook "单个用户图鉴信息的json数据"
 // @Failure 400 {object} model.MessageBind "400 bad request"
 // @Router /handbookbyopenid [post]
 func handBookByOpenid(group *gin.RouterGroup) {
@@ -91,8 +83,8 @@ func handBookByOpenid(group *gin.RouterGroup) {
 // @Tags book-routers
 // @Accept json
 // @Produce json
-// @Param handBook body model.HandBook true "更新用户信息"
-// @Success 200 {object} model.MessageBind "单个用户信息的背包json数据"
+// @Param handBook body model.HandBook true "更新的用户信息"
+// @Success 200 {object} model.MessageBind "更新成功"
 // @Failure 400 {object} model.MessageBind "400 bad request"
 // @Router /updatehandbook [post]
 func updateHandBook(group *gin.RouterGroup) {
@@ -120,7 +112,7 @@ func updateHandBook(group *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Param handBook body model.HandBook true "删除用户信息"
-// @Success 200 {object} model.MessageBind "单个用户信息的背包json数据"
+// @Success 200 {object} model.MessageBind "删除成功"
 // @Failure 400 {object} model.MessageBind "400 bad request"
 // @Router /deletehandbook [post]
 func deleteHandBook(group *gin.RouterGroup) {

@@ -227,11 +227,19 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:8848/api/piecebyopenid
+POST https://www.doremy.work/api/querybyopenid
 Content-Type: application/json
 
 {
   "openid": "oVQwG5gSjuwDY5s8mCr03D5kTFkI"
+}
+
+###
+POST http://localhost:8848/api/querybyopenid
+Content-Type: application/json
+
+{
+"openid": "oVQwG5gSjuwDY5s8mCr03D5kTFkI"
 }
 
 ###

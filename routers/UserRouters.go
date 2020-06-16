@@ -69,6 +69,8 @@ func queryByOpenid(group *gin.RouterGroup) {
 			var userDataTmp model.UserData
 			dao.DB.Where("openid = ?", userData.Openid).Find(&userData)
 			if userDataTmp.Openid != "" {
+				context.JSON(http.StatusBadRequest, model.MessageBind{Message: "get failed"})
+			} else {
 				context.JSON(http.StatusOK, userData)
 			}
 		}, &userData)

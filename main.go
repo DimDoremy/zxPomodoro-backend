@@ -27,7 +27,7 @@ func main() {
 	// 关闭控制台日志颜色，Windows控制台颜色显示有问题建议直接关闭
 	gin.DisableConsoleColor()
 	//设置release模式运行
-	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.ReleaseMode)
 
 	// 新建gin框架
 	r := gin.Default()

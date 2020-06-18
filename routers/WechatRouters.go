@@ -28,8 +28,8 @@ type userCode struct {
 // @Router /openid [post]
 func WechatRouter(router *gin.Engine) {
 	var code userCode
-	APPID := "wxb5ffc058d0c82c22"
-	SECRET := "27735d75d1fe375f83c99b993f541f28"
+	APPID := "微信小程序的APPID"
+	SECRET := "微信小程序的SECRET"
 	router.POST("/api/openid", func(context *gin.Context) {
 		util.JsonBind(context, func() {
 			wechatLoginUrl := "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + code.Code + "&grant_type=authorization_code"

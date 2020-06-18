@@ -12,7 +12,7 @@ var (
 
 func InitMySQL() error {
 	var err error
-	DB, err = gorm.Open("mysql", "UniData:186536_wlj@tcp(47.104.253.11:3306)/UniData?charset=utf8")
+	DB, err = gorm.Open("mysql", "User:passwdd@tcp(127.0.0.1:3306)/dbname?charset=utf8")
 	if err != nil {
 		// 暂时定义发生错误之间中断
 		return err

@@ -28,9 +28,9 @@
 
  
 
-![图表 1 main入口函数中的路由组注册](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image002.jpg)
+![图表 1 main入口函数中的路由组注册](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image002.jpg)
 
-![图表 2管理路由组下的所有路由情况（这里以UserRouter为例）](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image004.jpg)
+![图表 2管理路由组下的所有路由情况（这里以UserRouter为例）](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image004.jpg)
 
 
 
@@ -46,7 +46,7 @@
 
  
 
-![图表 3用于绑定JSON的函数](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image006.jpg)
+![图表 3用于绑定JSON的函数](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image006.jpg)
 
 
 
@@ -62,9 +62,9 @@
 
  
 
-![图表 4 MySQL数据库连接相关内容](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image008.jpg)
+![图表 4 MySQL数据库连接相关内容](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image008.jpg)
 
-![图表 5入口函数加载数据库连接](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image010.jpg)
+![图表 5入口函数加载数据库连接](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image010.jpg)
 
 
 
@@ -80,7 +80,7 @@
 
 
 
-![图表 6用于ORM的结构体（以UserData为例）](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image011.png)
+![图表 6用于ORM的结构体（以UserData为例）](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image011.jpg)
 
 ## Redis连接池
 
@@ -94,9 +94,9 @@
 
  
 
-![图表 7 初始化连接池](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image013.jpg)
+![图表 7 初始化连接池](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image013.jpg)
 
-![图表 8入口函数启动连接池和gc](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image015.jpg)
+![图表 8入口函数启动连接池和gc](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image015.jpg)
 
 ## Redis数据库操作
 
@@ -112,25 +112,25 @@
 
  
 
-![图表 9通过Key找到Value](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image017.jpg)
+![图表 9通过Key找到Value](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image017.jpg)
 
-![图表 10修改对应Key的Value，找不到Key则执行添加这组Key-Value](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image019.jpg)
+![图表 10修改对应Key的Value，找不到Key则执行添加这组Key-Value](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image019.jpg)
 
-![图表 11删除对应Key-Value](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image020.png)
+![图表 11删除对应Key-Value](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image020.jpg)
 
 ## 微信登陆服务器验证
 
 ​    根据微信小程序的开发文档描述，对于有关微信授权的操作需要先由客户端请求我们使用的后端服务器，再通过后端服务器发送请求给微信小程序的后台，获取Session_key和openid，故在此编写一个用于小程序登录的接口。
 
-![图表 12微信小程序服务器验证请求接口](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image022.jpg)
+![图表 12微信小程序服务器验证请求接口](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image022.jpg)
 
 ## Swaggo注解API文档开发
 
 ​    Swaggo工具是Java中Swagger的Golang实现，但是不同于Java可以直接使用注解方式配置Swagger，Golang里没有和Java一样“@“的注解，所以这个工具是通过将注释对应解析，生成docs.go文件解析swagger.json实现的如同Swagger的操作。
 
-![图表 13 swagger.json](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image024.jpg)
+![图表 13 swagger.json](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image024.jpg)
 
-![图表 14 docs.go](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image026.jpg)
+![图表 14 docs.go](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image026.jpg)
 
 ## AIR
 
@@ -140,13 +140,13 @@
 
 ​    具体操作参考：https://github.com/cosmtrek/air
 
-![图表 15 .air.conf](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image028.jpg)
+![图表 15 .air.conf](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image028.jpg)
 
 ## 反射（Reflect）
 
 ​    因为Redis连接使用的redigo包为了读取不同类型的数据，将获取参数的返回值定义为interface{}型，而Golang语言一个很大的问题在于为了效率牺牲了泛型，interface{}这个类型，仅可以储存任意类型的数据但不能弱类型转换成其他类型数据，对于这个问题，我们采用了官方包中的Reflect包获取对应值转换为结构体进行解析。
 
-![图表 16 Reflect实现错误处理和取值](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image030.jpg)
+![图表 16 Reflect实现错误处理和取值](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image030.jpg)
 
 # 现有的问题
 
@@ -166,7 +166,7 @@
 
 预期解决方式：负载均衡。
 
-![图表 17 hey工具POST测试Redis连接池测试报告](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image032.jpg)
+![图表 17 hey工具POST测试Redis连接池测试报告](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image032.jpg)
 
 ## 招募获取房间人数
 
@@ -184,7 +184,7 @@
 
 问题：使用了Redis缓存池的方式来处理招募数据，优点是的确运行效率很高，基本平均在我们实际使用测试时每个请求的相应时间都在几ms左右，但是由于数据存在与内存，一旦服务器出现了突然断电维护，内存中的所有数据将会失效。
 
-![图表 18缓存雪崩原理图](file:///C:/Users/Doremy/AppData/Local/Temp/msohtmlclip1/01/clip_image034.jpg)
+![图表 18缓存雪崩原理图](https://github.com/DimDoremy/zxPomodoro-backend/blob/master/readme/clip_image034.jpg)
 
 预期解决方式：
 
